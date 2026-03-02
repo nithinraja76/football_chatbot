@@ -76,17 +76,17 @@ User sees response (+ optional Plotly chart)
 
 | File | Source | Records | Purpose |
 |---|---|---|---|
-| `results.csv` | [Kaggle — martj42](https://www.kaggle.com/datasets/martj42/international-football-results-from-1872-to-2017) | 49,016 rows | All international matches 1872–2025 |
-| `goalscorers.csv` | Kaggle — martj42 | ~1M rows | Every goal with scorer name and type |
-| `shootouts.csv` | Kaggle — martj42 | 665 rows | Penalty shootout winners |
-| `former_names.csv` | Kaggle — martj42 | ~100 rows | Historical team name mappings |
+| `results.csv` | [Kaggle - martj42](https://www.kaggle.com/datasets/martj42/international-football-results-from-1872-to-2017) | 49,016 rows | All international matches 1872–2025 |
+| `goalscorers.csv` | Kaggle - martj42 | ~1M rows | Every goal with scorer name and type |
+| `shootouts.csv` | Kaggle - martj42 | 665 rows | Penalty shootout winners |
+| `former_names.csv` | Kaggle - martj42 | ~100 rows | Historical team name mappings |
 | Wikipedia 2026 | Scraped (cached locally) | ~50 facts | Qualified teams, host cities, format |
 
 ---
 
 ## Data Pipeline
 
-### Step 1 — Name Normalization
+### Step 1 - Name Normalization
 `former_names.csv` is loaded first to build a normalization dictionary. All team names across every file are mapped to their current FIFA name before any processing begins.
 
 ```
@@ -97,12 +97,12 @@ User sees response (+ optional Plotly chart)
 
 This ensures consistent team tracking across the full 153-year dataset.
 
-### Step 2 — Load & Filter
+### Step 2 - Load & Filter
 - `results.csv` loaded and all team names normalized
-- Filtered to `tournament == "FIFA World Cup"` only — excludes qualifiers and friendlies
+- Filtered to `tournament == "FIFA World Cup"` only - excludes qualifiers and friendlies
 - Two DataFrames created: `df_wc` (~850 WC matches) and `df_all` (all 49,016 matches)
 
-### Step 3 — Enrich with Goalscorers
+### Step 3 - Enrich with Goalscorers
 `goalscorers.csv` is parsed into a lookup dictionary keyed by `(date, home_team, away_team)`. Each entry stores home and away scorer lists with annotations:
 
 ```python
@@ -111,16 +111,16 @@ This ensures consistent team tracking across the full 153-year dataset.
 "Müller (OG)"  # own goal
 ```
 
-### Step 4 — Enrich with Shootouts
+### Step 4 - Enrich with Shootouts
 `shootouts.csv` is parsed into a lookup dictionary by match. Critical for matches like the 2022 Final where Argentina vs France ended 3-3 but Argentina won on penalties.
 
-### Step 5 — Compute Team Stats
+### Step 5 - Compute Team Stats
 For each of ~80 teams, pre-computed aggregates include: appearances, matches played, wins/draws/losses, win rate %, goals scored/conceded, average goals per game, best stage reached, top 5 all-time WC scorers, and penalty shootout record.
 
-### Step 6 — Scrape Wikipedia 2026
+### Step 6 - Scrape Wikipedia 2026
 See [Caching Notes](#caching-notes) for scraping behavior.
 
-### Step 7 — Sanity Checks
+### Step 7 - Sanity Checks
 Automated assertions verify:
 - Germany appears only as "Germany" (not "West Germany") ✅
 - 2022 World Cup shows ~64 matches ✅
@@ -134,15 +134,15 @@ Automated assertions verify:
 ### Hybrid Document Format
 Every match is converted into a LangChain `Document` with two components:
 
-**`page_content`** — natural language sentence for semantic embedding:
+**`page_content`** - natural language sentence for semantic embedding:
 ```
 "In the 2014 FIFA World Cup Semi-Final in Belo Horizonte,
 Germany defeated Brazil 7–1 in a dominant performance.
-Scorers — Germany: Thomas Müller, Miroslav Klose, Toni Kroos (x2),
+Scorers - Germany: Thomas Müller, Miroslav Klose, Toni Kroos (x2),
 Sami Khedira, André Schürrle (x2). Brazil: Oscar."
 ```
 
-**`metadata`** — structured dictionary for exact filtering:
+**`metadata`** - structured dictionary for exact filtering:
 ```python
 {
   "year": 2014, "stage": "Semi-Final",
@@ -166,13 +166,13 @@ This hybrid approach enables both semantic search ("find exciting finals") and e
 
 **All indexes:** dimension=1536, metric=cosine, cloud=AWS us-east-1
 
-Documents are uploaded in batches of 100. Data persists in Pinecone permanently — skip the upload section on all subsequent sessions.
+Documents are uploaded in batches of 100. Data persists in Pinecone permanently - skip the upload section on all subsequent sessions.
 
 ---
 
 ## The 5 Tools
 
-Each tool is a Python function decorated with `@tool`. The LangGraph agent reads each tool's docstring to decide when to call it — so docstring clarity directly affects routing accuracy.
+Each tool is a Python function decorated with `@tool`. The LangGraph agent reads each tool's docstring to decide when to call it - so docstring clarity directly affects routing accuracy.
 
 ### `match_retrieval_tool`
 - **Index:** `worldcup-matches`
@@ -229,7 +229,7 @@ Observation: [3-paragraph preview returned]
 Final Answer: Preview shown to user + Plotly chart rendered
 ```
 
-The agent autonomously chains tools — calling `head_to_head_tool` before `match_prediction_tool` without being explicitly told to, because the prediction tool's docstring signals it requires H2H context.
+The agent autonomously chains tools - calling `head_to_head_tool` before `match_prediction_tool` without being explicitly told to, because the prediction tool's docstring signals it requires H2H context.
 
 ---
 
@@ -237,7 +237,7 @@ The agent autonomously chains tools — calling `head_to_head_tool` before `matc
 
 ### System Prompt (Agent)
 The agent system prompt instructs the model to:
-- Always retrieve data using the appropriate tool before answering — never answer from training memory alone
+- Always retrieve data using the appropriate tool before answering - never answer from training memory alone
 - Call `head_to_head_tool` before `match_prediction_tool` for prediction queries
 - Respect user preferences (language, detail level, format) when formatting responses
 - Gracefully handle cases where retrieved data is sparse or ambiguous
@@ -256,14 +256,14 @@ Respond in {language}. Detail level: {detail_level}.
 ```
 
 ### Embedding Strategy
-All documents use `text-embedding-3-small` (1536 dimensions). The natural language `page_content` is what gets embedded — the `metadata` is stored alongside for filtering but not embedded. This means semantic queries like "Brazil's biggest ever loss" surface the right match even without exact keyword overlap.
+All documents use `text-embedding-3-small` (1536 dimensions). The natural language `page_content` is what gets embedded - the `metadata` is stored alongside for filtering but not embedded. This means semantic queries like "Brazil's biggest ever loss" surface the right match even without exact keyword overlap.
 
 ---
 
 ## Memory System
 
 ### Session Memory (Conversation Context)
-Uses LangGraph's `MemorySaver` with a unique `thread_id` per conversation. All messages are stored automatically — follow-up questions work without repeating team names.
+Uses LangGraph's `MemorySaver` with a unique `thread_id` per conversation. All messages are stored automatically - follow-up questions work without repeating team names.
 
 ```python
 # Each session gets a fresh thread
@@ -294,7 +294,7 @@ User preferences are saved to a local JSON file and survive across sessions.
 ## Caching Notes
 
 ### Wikipedia 2026 Scrape
-The scraper applies a **2-second rate limit** between requests (responsible scraping). The raw HTML is cached locally on first run — subsequent sessions load from cache without hitting the network.
+The scraper applies a **2-second rate limit** between requests (responsible scraping). The raw HTML is cached locally on first run - subsequent sessions load from cache without hitting the network.
 
 ```python
 CACHE_PATH = "wiki_2026_cache.html"
@@ -323,7 +323,7 @@ Data is uploaded to Pinecone **once** and persists permanently in the cloud. On 
 ## UI Modes
 
 ### Streamlit Web App (Deployed)
-Key difference: **reads H2H data from Pinecone** instead of `df_all` — works anywhere without CSV files present.
+Key difference: **reads H2H data from Pinecone** instead of `df_all` - works anywhere without CSV files present.
 
 **Deployment steps:**
 1. Push `app.py` + `requirements.txt` to GitHub
@@ -361,7 +361,7 @@ beautifulsoup4
 requests
 ```
 
-> **Note on version pinning:** Colab pre-installs packages like `tensorflow` and `numba` that conflict with pinned `numpy` versions. Let pip resolve compatible versions automatically — do not pin numpy explicitly.
+> **Note on version pinning:** Colab pre-installs packages like `tensorflow` and `numba` that conflict with pinned `numpy` versions. Let pip resolve compatible versions automatically - do not pin numpy explicitly.
 
 ---
 
