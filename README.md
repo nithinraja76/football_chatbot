@@ -362,7 +362,3 @@ requests
 ```
 
 > **Note on version pinning:** Colab pre-installs packages like `tensorflow` and `numba` that conflict with pinned `numpy` versions. Let pip resolve compatible versions automatically - do not pin numpy explicitly.
-
----
-
-*For questions or issues, open a GitHub issue on [nithinraja76/football_chatbot](https://github.com/nithinraja76/football_chatbot).*
