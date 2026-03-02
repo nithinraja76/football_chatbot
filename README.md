@@ -322,14 +322,6 @@ Data is uploaded to Pinecone **once** and persists permanently in the cloud. On 
 
 ## UI Modes
 
-### Colab Notebook (ipywidgets)
-Runs directly inside Google Colab — no external tools or deployment needed.
-- Reads from local CSV files (`df_all` DataFrame in memory)
-- Chat history with colored messages
-- Preferences sidebar
-- Plotly charts render inline below predictions
-- `new_session()` clears memory
-
 ### Streamlit Web App (Deployed)
 Key difference: **reads H2H data from Pinecone** instead of `df_all` — works anywhere without CSV files present.
 
