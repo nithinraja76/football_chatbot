@@ -4,7 +4,7 @@
 > Built with LangChain · LangGraph · Pinecone · OpenAI · Streamlit | Data: 1872–2025
 
 **Live App:** [footballchatbot-genai.streamlit.app](https://footballchatbot-genai.streamlit.app)
-**Author:** Ragul Narayanan Magesh · MS Data Analytics Engineering · Northeastern University
+**Author:** Ragul Magesh Narayan | Nithin Arumugam Raja | yashwanth Kumar Reddy . Northeastern University
 
 ---
 
